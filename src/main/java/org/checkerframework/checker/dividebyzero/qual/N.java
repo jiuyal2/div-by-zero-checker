@@ -2,13 +2,11 @@ package org.checkerframework.checker.dividebyzero.qual;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
 import org.checkerframework.framework.qual.SubtypeOf;
 
 /**
- * Top lattice element for the DivByZero type system, top means zeroable.
- */
-@DefaultQualifierInHierarchy
-@SubtypeOf({})
+* Negative integer lattice element, but not zero
+*/
+@SubtypeOf({NZ.class})
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface Top {}
+public @interface N {}
