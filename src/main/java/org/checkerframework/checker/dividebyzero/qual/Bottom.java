@@ -7,6 +7,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
 /**
 * Bottom lattice element
 */
-@SubtypeOf({P.class, Z.class, N.class})
+@SubtypeOf({Z.class, NZ.class})
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface Bottom {}

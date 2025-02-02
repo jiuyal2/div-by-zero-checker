@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.checker.dividebyzero.qual.*;
 import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.N;
 import org.checkerframework.dataflow.analysis.ConditionalTransferResult;
 import org.checkerframework.dataflow.analysis.RegularTransferResult;
 import org.checkerframework.dataflow.analysis.TransferInput;
@@ -79,9 +80,7 @@ public class DivByZeroTransfer extends CFTransfer {
       Comparison operator, AnnotationMirror lhs, AnnotationMirror rhs) {
 
       AnnotationMirror nz = reflect(NZ.class);
-      AnnotationMirror p = reflect(P.class);
       AnnotationMirror z = reflect(Z.class);
-      AnnotationMirror n = reflect(N.class);
       AnnotationMirror t = top();
       AnnotationMirror b = bottom();
 
@@ -101,83 +100,59 @@ public class DivByZeroTransfer extends CFTransfer {
         int lhsIndex = 0;
         int rhsIndex = 0;
 
-        if (lhs == reflect(NZ.class)) {
+        if (equal(lhs,reflect(NZ.class))) {
           lhsIndex = 0;
-        } else if (lhs == reflect(P.class)) {
+        } else if (equal(lhs, reflect(Z.class))) {
           lhsIndex = 1;
-        } else if (lhs == reflect(Z.class)) {
-          lhsIndex = 2;
-        } else if (lhs == reflect(N.class)) {
-          lhsIndex = 3;
         } else {
-          lhsIndex = 4;
+          lhsIndex = 2;
         }
-  
-        if (rhs == reflect(NZ.class)) {
+
+        if (equal(rhs,reflect(NZ.class))) {
           rhsIndex = 0;
-        } else if (rhs == reflect(P.class)) {
+        } else if (equal(rhs, reflect(Z.class))) {
           rhsIndex = 1;
-        } else if (rhs == reflect(Z.class)) {
+        } else {
           rhsIndex = 2;
-        } else { 
-          rhsIndex = 3;
         }
+        
         // Table for the comparison
         AnnotationMirror[][] eq = {
-          {nz, p, b, n, nz},
-          {p, p, b, b, p},
-          {b, b, z, b, z},
-          {n, b, b, n, n}
+          {nz, b, nz},
+          {b, z, z},
+          {nz, z, t}
         };
 
         if (operator == Comparison.NE) {
-          if (rhs == z && lhs == z) {
+          if (equal(rhs, z) && equal(lhs, z)) {
             return b;
           }
-          if (rhs == z && lhs == t) {
+          if (equal(t, lhs) && equal(z, rhs)) {
             return nz;
           }
           return lhs;
         }
 
         AnnotationMirror[][] lt = {
-          {nz, p, z, n, t},
-          {nz, p, z, n, t},
-          {n, b, b, n, n},
-          {n, b, b, n, n}
-        };
-
-        AnnotationMirror[][] le = {
-          {nz, p, z, n, t},
-          {nz, p, z, n, t},
-          {n, b, z, n, t},
-          {n, b, b, n, n}
+          {nz, z, t},
+          {nz, b, nz},
+          {nz, z, t}
         };
 
         AnnotationMirror[][] gt = {
-          {nz, p, z, n, t},
-          {p, p, b, b, p},
-          {p, p, b, b, p},
-          {nz, p, z, n, t},
+          {nz, z, t},
+          {nz, b, nz},
+          {nz, z, t}
         };
 
-        AnnotationMirror[][] ge = {
-          {nz, p, z, n, t},
-          {p, p, b, b, p},
-          {p, p, z, b, t},
-          {nz, p, z, n, t},
-        };
+
 
         if (operator == Comparison.EQ) {
           return eq[rhsIndex][lhsIndex];
         } else if (operator == Comparison.LT) {
           return lt[rhsIndex][lhsIndex];
-        } else if (operator == Comparison.LE) {
-          return le[rhsIndex][lhsIndex];
         } else if (operator == Comparison.GT) {
           return gt[rhsIndex][lhsIndex];
-        } else if (operator == Comparison.GE) {
-          return ge[rhsIndex][lhsIndex];
         }
 
 
@@ -201,7 +176,7 @@ public class DivByZeroTransfer extends CFTransfer {
    */
   private AnnotationMirror arithmeticTransfer(
       BinaryOperator operator, AnnotationMirror lhs, AnnotationMirror rhs) {
-      if (lhs == bottom() || rhs == bottom()) {
+      if (equal(lhs, bottom()) || equal(rhs, bottom())) {
         return bottom();
       }
 
@@ -210,100 +185,61 @@ public class DivByZeroTransfer extends CFTransfer {
       int lhsIndex = 0;
       int rhsIndex = 0;
 
-      if (lhs == reflect(NZ.class)) {
+      if (equal(lhs, reflect(NZ.class))) {
         lhsIndex = 0;
-      } else if (lhs == reflect(P.class)) {
+      } else if (equal(lhs, reflect(Z.class))) {
         lhsIndex = 1;
-      } else if (lhs == reflect(Z.class)) {
-        lhsIndex = 2;
-      } else if (lhs == reflect(N.class)) {
-        lhsIndex = 3;
       } else {
-        lhsIndex = 4;
+        lhsIndex = 2;
       }
 
-      if (rhs == reflect(NZ.class)) {
+      if (equal(rhs, reflect(NZ.class))) {
         rhsIndex = 0;
-      } else if (rhs == reflect(P.class)) {
+      } else if (equal(rhs, reflect(Z.class))) {
         rhsIndex = 1;
-      } else if (rhs == reflect(Z.class)) {
-        rhsIndex = 2;
-      } else if (rhs == reflect(N.class)) {
-        rhsIndex = 3;
       } else {
-        rhsIndex = 4;
+        rhsIndex = 2;
       }
+
 
       // create types for the result of the arithmetic operation
       AnnotationMirror nz = reflect(NZ.class);
-      AnnotationMirror p = reflect(P.class);
       AnnotationMirror z = reflect(Z.class);
-      AnnotationMirror n = reflect(N.class);
       AnnotationMirror t = top();
+      AnnotationMirror b = bottom();
 
       // transfer function tables
       AnnotationMirror[][] plus = {
-        {t, t, nz, t, t},
-        {t, p, p, t, t},
-        {nz, p, z, n, t},
-        {t, t, n, n, t},
-        {t, t, t, t, t}
+        {t, nz, t},
+        {nz, z, t},
+        {t, t, t}
       };
 
       // minus will be invert the second operand and use the plus table
 
       AnnotationMirror[][] times = {
-        {nz, nz, z, nz, t},
-        {nz, p, z, n, t},
-        {z, z, z, z, z},
-        {nz, n, z, p, t},
-        {t, t, z, t, t}
+        {nz, z, t},
+        {z, z, z},
+        {t, z, t}
       };
       
       AnnotationMirror[][] divide = {
-        {t, t, z, t, t},
-        {t, p, z, n, t},
-        {t, t, t, t, t},
-        {t, n, z, p, t},
-        {t, t, z, t, t}
+        {t, z, t},
+        {b, b, b},
+        {t, z, t}
       };
 
-      AnnotationMirror[][] mod = {
-        {t, t, nz, t, t},
-        {t, t, p, t, t},
-        {t, t, t, t, t},
-        {t, t, n, t, t},
-        {t, t, t, t, t}
-      };
-
-      if (operator == BinaryOperator.PLUS) {
-        return plus[rhsIndex][lhsIndex];
-      } else if (operator == BinaryOperator.MINUS) {
-
-        // invert the second operand and use the plus table
-        if (rhsIndex == 0) {
-          rhsIndex = 1;
-        } else if (rhsIndex == 1) {
-          rhsIndex = 0;
-        } else if (rhsIndex == 2) {
-          rhsIndex = 4;
-        } else if (rhsIndex == 4) {
-          rhsIndex = 2;
-        }
-
-
-        return plus[rhsIndex][lhsIndex];
+      if (operator == BinaryOperator.PLUS || operator == BinaryOperator.MINUS) {
+        return plus[rhsIndex][lhsIndex]; 
       } else if (operator == BinaryOperator.TIMES) {
         return times[rhsIndex][lhsIndex];
-      } else if (operator == BinaryOperator.DIVIDE) {
+      } else if (operator == BinaryOperator.DIVIDE || operator == BinaryOperator.MOD) {
         return divide[rhsIndex][lhsIndex];
-      } else if (operator == BinaryOperator.MOD) {
-        return mod[rhsIndex][lhsIndex];
       }
 
     return top();
   }
-
+  
   // ========================================================================
   // Useful helpers
 

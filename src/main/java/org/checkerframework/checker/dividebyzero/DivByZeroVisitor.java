@@ -28,15 +28,14 @@ public class DivByZeroVisitor extends BaseTypeVisitor<DivByZeroAnnotatedTypeFact
    */
   private boolean errorAt(BinaryTree node) {
     // A BinaryTree can represent any binary operator, including + or -.
-    if (DIVISION_OPERATORS.contains(node.getKind())) {
-      ExpressionTree rhs = node.getRightOperand();
-
-      // check the lattice elements of rhs, if it is any of top, nz, pz, and z, then return true
-      if (hasAnnotation(rhs, Top.class) || hasAnnotation(rhs, Z.class)) {
-        return true;
-      }
-    }
-    return false;
+      // System.out.print(node); System.out.print(" ");
+      // System.out.print(node.getKind());System.out.print(" ");
+      // System.out.print(node.getLeftOperand());System.out.print(" ");
+      // System.out.print(node.getRightOperand());System.out.print(" ");
+      // System.out.print(hasAnnotation(node.getRightOperand(), Z.class));
+      // System.out.println("");
+  
+    return (DIVISION_OPERATORS.contains(node.getKind())) && (hasAnnotation(node.getRightOperand(), Top.class) || hasAnnotation(node.getRightOperand(), Z.class));
   }
 
   /**
@@ -49,13 +48,7 @@ public class DivByZeroVisitor extends BaseTypeVisitor<DivByZeroAnnotatedTypeFact
   private boolean errorAt(CompoundAssignmentTree node) {
     // A CompoundAssignmentTree represents any binary operator combined with an assignment,
     // such as "x += 10".
-    if (DIVISION_OPERATORS.contains(node.getKind())) {
-      ExpressionTree rhs = node.getExpression();
-      if (hasAnnotation(rhs, Top.class) || hasAnnotation(rhs, Z.class)) {
-        return true;
-      }
-    }
-    return false;
+    return (DIVISION_OPERATORS.contains(node.getKind())) && (hasAnnotation(node.getExpression(), Top.class) || hasAnnotation(node.getExpression(), Z.class));
   }
 
   // ========================================================================
